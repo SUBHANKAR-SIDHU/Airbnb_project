@@ -68,10 +68,6 @@ body {
 }
 
 
-form .btn:hover{
-    background-color: #fe424d !important;
-}
-
 /* show ejs*/
 .show-card{
     display: flex !important;
