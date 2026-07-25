@@ -7,7 +7,8 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const { listingSchema } = require("./schema.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
+const Review = require("./models/review.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/paradise";
 
@@ -49,7 +50,16 @@ app.get("/listing/new", async (req, res) => {
 let listingValidation = (req, res, next) => {
   let { error } = listingSchema.validate(req.body);
   if (error) {
-    let errMess = error.details.map((elem)=>elem.message).join(",");
+    let errMess = error.details.map((elem) => elem.message).join(",");
+    throw new ExpressError(400, errMess);
+  } else {
+    next();
+  }
+};
+let reviewValidation = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body);
+  if (error) {
+    let errMess = error.details.map((elem) => elem.message).join(",");
     throw new ExpressError(400, errMess);
   } else {
     next();
@@ -61,7 +71,7 @@ app.get(
   "/listings/:id",
   wrapAsync(async (req, res, next) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     if (!listing) {
       throw new ExpressError(406, "Not Acceptable");
     }
@@ -77,6 +87,20 @@ app.post(
     const newListing = new Listing(req.body.Listing);
     await newListing.save();
     res.redirect("/listings");
+  }),
+);
+
+//create review route
+app.post(
+  "/listings/:id/review",
+  reviewValidation,
+  wrapAsync(async (req, res) => {
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+    await newReview.save();
+    listing.reviews.push(newReview);
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
   }),
 );
 
