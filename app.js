@@ -43,7 +43,7 @@ app.get(
 );
 
 //new routes
-app.get("/listing/new", async (req, res) => {
+app.get("/listings/new", async (req, res) => {
   res.render("listing/new.ejs");
 });
 
@@ -84,7 +84,7 @@ app.post(
   "/listings",
   listingValidation,
   wrapAsync(async (req, res, next) => {
-    const newListing = new Listing(req.body.Listing);
+    const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
   }),
@@ -112,7 +112,7 @@ app.delete(
     let { id, reviewId } = req.params;
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
     await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/listings/${id}`)
+    res.redirect(`/listings/${id}`);
   }),
 );
 
@@ -129,13 +129,14 @@ app.get(
 //update routes
 app.put(
   "/listings/:id",
+  listingValidation,
   wrapAsync(async (req, res) => {
     if (!req.body.listing) {
       throw new ExpressError(400, "send the validate data");
     }
     let { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.Listing });
-    res.redirect("/listings");
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    res.redirect(`/listings/${id}`);
   }),
 );
 
