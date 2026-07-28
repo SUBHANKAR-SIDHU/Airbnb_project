@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review.js");
 
-const listingschema = new Schema({
+const DEFAULT_IMAGE =
+  "https://unsplash.com/photos/black-and-blue-laptop-computer-bGWVhFY1gH0";
+
+const listingSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -10,12 +13,8 @@ const listingschema = new Schema({
   description: String,
   image: {
     type: String,
-    default:
-      "https://unsplash.com/photos/black-and-blue-laptop-computer-bGWVhFY1gH0",
-    set: (v) =>
-      v === "" ?
-        "https://unsplash.com/photos/black-and-blue-laptop-computer-bGWVhFY1gH0"
-      : v,
+    default: DEFAULT_IMAGE,
+    set: (v) => (v === "" || v == null ? DEFAULT_IMAGE : v),
   },
   price: Number,
   location: String,
@@ -28,12 +27,12 @@ const listingschema = new Schema({
   ],
 });
 
-listingschema.post("findOneAndDelete", async (listing) => {
-  if (listing) {
+listingSchema.post("findOneAndDelete", async (listing) => {
+  if (listing?.reviews?.length) {
     await Review.deleteMany({ _id: { $in: listing.reviews } });
   }
 });
 
-const Listing = mongoose.model("Listing", listingschema);
+const Listing = mongoose.model("Listing", listingSchema);
 
 module.exports = Listing;
