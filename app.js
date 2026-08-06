@@ -5,13 +5,15 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+
+const listingRouter = require("./routes/listing.js");
+const reviewsRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/paradise";
 
@@ -32,9 +34,9 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
-app.get("/", (req, res) => {
-  res.send("hii im root");
-});
+// app.get("/", (req, res) => {
+//   res.send("hii im root");
+// });
 
 const sessionOption = {
   secret: "mysecretcode",
@@ -62,17 +64,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/demo", async (req, res) => {
-  let fakeuser = new User({
-    email: "abc@gmail.com",
-    username: "abc",
-  });
-  let rigisterUser = await User.register(fakeuser, "helloworld");
-  res.send(rigisterUser);
-});
+// app.get("/demo", async (req, res) => {
+//   let fakeuser = new User({
+//     email: "abc@gmail.com",
+//     username: "abc",
+//   });
+//   let rigisterUser = await User.register(fakeuser, "helloworld");
+//   res.send(rigisterUser);
+// });
 
-app.use("/listings", listings);
-app.use("/listings/:id/review", reviews);
+app.use("/listings", listingRouter);
+app.use("/listings/:id/review", reviewsRouter);
+app.use("/",userRouter)
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "page not found"));
