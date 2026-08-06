@@ -73,3 +73,34 @@ body {
     display: flex !important;
     border: none !important;
 }
+
+.login{
+    width: 100% ;
+    height: 80vh;
+    display: flex;
+    gap: 5%;
+    overflow: hidden;
+}
+
+.loginLeft{
+    width: 55%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.loginLeft img{
+    transition: all 0.4s ease-out;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 1%;
+}
+
+.loginLeft:hover img{
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.loginRight{
+    width: 35%;
+}
