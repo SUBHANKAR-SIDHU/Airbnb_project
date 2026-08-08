@@ -34,9 +34,6 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
-// app.get("/", (req, res) => {
-//   res.send("hii im root");
-// });
 
 const sessionOption = {
   secret: "mysecretcode",
@@ -61,17 +58,10 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.currUser = req.user;
   next();
 });
 
-// app.get("/demo", async (req, res) => {
-//   let fakeuser = new User({
-//     email: "abc@gmail.com",
-//     username: "abc",
-//   });
-//   let rigisterUser = await User.register(fakeuser, "helloworld");
-//   res.send(rigisterUser);
-// });
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/review", reviewsRouter);
