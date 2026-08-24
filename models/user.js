@@ -13,7 +13,6 @@ const userSchema = new Schema({
   },
 });
 
-console.log(typeof passportLocalMongoose);
 userSchema.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model("User", userSchema);
