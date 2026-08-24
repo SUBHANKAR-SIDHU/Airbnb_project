@@ -5,6 +5,7 @@ const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/review.js");
 const { listingSchema, reviewSchema } = require("../schema.js");
 const Listing = require("../models/listing.js");
+const { isLoggedIn, isReviewAuthor } = require("../auth.js");
 
 const reviewValidation = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body);
@@ -20,12 +21,14 @@ const reviewValidation = (req, res, next) => {
 //create review route
 router.post(
   "/",
+  isLoggedIn,
   reviewValidation,
   wrapAsync(async (req, res) => {
     let listing = await Listing.findById(req.params.id);
     let newReview = new Review(req.body.review);
-    await newReview.save();
+    newReview.author = req.user._id;
     listing.reviews.push(newReview);
+    await newReview.save();
     await listing.save();
     req.flash("success","new review created")
     res.redirect(`/listings/${listing._id}`);
@@ -36,6 +39,8 @@ router.post(
 
 router.delete(
   "/:reviewId",
+  isLoggedIn,
+  isReviewAuthor,
   wrapAsync(async (req, res) => {
     let { id, reviewId } = req.params;
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
