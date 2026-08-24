@@ -10,6 +10,9 @@
       <div class="lists">
         <ul>
           <li><b>
+              <%= listing.owner.username %>
+            </b></li>
+          <li><b>
               <%= listing.title %>
             </b></li>
           <li>
@@ -23,6 +26,7 @@
             <%= listing.country %>
           </li>
         </ul>
+        <% if(currUser && listing.owner._id.equals(currUser._id)){ %>
         <div class="d-flex ms-2 gap-2">
           <form action="/listings/<%=listing._id%>/edit">
             <button class="btn btn-outline-secondary card-link">Edit</button>
@@ -31,9 +35,11 @@
             <button class="btn btn-outline-dark card-link">Delete</button>
           </form>
         </div>
+        <% } %>
       </div>
     </div>
   </div>
+  <% if(currUser) {%>
   <div class="col-8 offset-2 mb-3">
     <hr />
     <h4>Leave a Review</h4>
@@ -53,6 +59,7 @@
       </div>
     </form>
   </div>
+  <% } %>
   <div class="col-8 offset-2 mb-3">
     <hr>
     <h4>All Reviews</h4>
@@ -60,7 +67,7 @@
       <% for(review of listing.reviews) { %>
         <div class="card mb-3  col-5 p-2 ms-4">
           <div class="card-body">
-            <h5 class="card-title">User_name</h5>
+            <h5 class="card-title">@<%= review.author.username %></h5>
             <p class="card-text">
               <%= review.comment %>
             </p>
