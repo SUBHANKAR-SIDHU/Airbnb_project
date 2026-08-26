@@ -5,8 +5,10 @@ const ExpressError = require("../utils/ExpressError.js");
 const { listingSchema } = require("../schema.js");
 const Listing = require("../models/listing.js");
 const { isLoggedIn, isOwner } = require("../auth.js");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
-const listingController = require("../controllers/listings.js")
+const listingController = require("../controllers/listings.js");
 
 let listingValidation = (req, res, next) => {
   let { error } = listingSchema.validate(req.body);
@@ -17,32 +19,29 @@ let listingValidation = (req, res, next) => {
     next();
   }
 };
-//index routes
-router.get(
-  "/",
-  wrapAsync(listingController.index),
-);
+
+//index routes and create routes
+router
+  .route("/")
+  .get(wrapAsync(listingController.index))
+  // .post(
+  //   isLoggedIn,
+  //   listingValidation,
+  //   wrapAsync(listingController.createListing),
+  // );
+  .post(upload.single("listing[image]"), (req, res) => {
+    res.send(req.file);
+  });
 
 //new routes
-router.get(
-  "/new",
-  isLoggedIn,
-  wrapAsync(listingController.renderNewForm),
-);
+router.get("/new", isLoggedIn, wrapAsync(listingController.renderNewForm));
 
-// show routes
-router.get(
-  "/:id",
-  wrapAsync(listingController.showListing),
-);
-
-//create routes
-router.post(
-  "/",
-  isLoggedIn,
-  listingValidation,
-  wrapAsync(listingController.createListing),
-);
+//show , update and delete
+router
+  .route("/:id")
+  .get(wrapAsync(listingController.showListing))
+  .put(isLoggedIn, isOwner, wrapAsync(listingController.updateListing))
+  .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
 
 //edit routes
 router.get(
@@ -50,22 +49,6 @@ router.get(
   isLoggedIn,
   isOwner,
   wrapAsync(listingController.editListing),
-);
-
-//update routes
-router.put(
-  "/:id/",
-  isLoggedIn,
-  isOwner,
-  wrapAsync(listingController.updateListing),
-);
-
-//delete route
-router.delete(
-  "/:id",
-  isLoggedIn,
-  isOwner,
-  wrapAsync(listingController.destroyListing),
 );
 
 module.exports = router;
